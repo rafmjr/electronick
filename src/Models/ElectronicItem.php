@@ -7,6 +7,7 @@ abstract class ElectronicItem
     const ELECTRONIC_ITEM_CONSOLE = 'console';
     const ELECTRONIC_ITEM_MICROWAVE = 'microwave';
     const ELECTRONIC_ITEM_TELEVISION = 'television';
+    const ELECTRONIC_ITEM_CONTROLLER = 'controller';
 
     /**
      * [$types description]
@@ -18,37 +19,45 @@ abstract class ElectronicItem
         self::ELECTRONIC_ITEM_TELEVISION,
     );
 
-    // TODO: encapsulate these properties
     /**
      * [$price description]
      * @var float
      */
-    public $price;
+    protected $price;
 
     /**
      * [$wired description]
      * @var bool
      */
-    public $wired;
+    protected $wired;
 
     /**
      * [$type description]
      * @var string
      */
-    private $type;
+    protected $type;
 
     /**
-     * TODO: can this be an instance of ElectronicItems?
-     * [$extras description]
      * @var array
      */
-    protected $extras;
+    protected $extras = array();
 
     /**
-     * [$extras_limit description]
+     * [$extrasMax description]
      * @var [type]
      */
-    protected $extras_limit;
+    protected $extrasMax = -1;
+
+    function __construct(float $price = 0.00, bool $wired = false)
+    {
+        $this->price = $price;
+        $this->wired = $wired;
+    }
+
+    public static function getTypes(): array
+    {
+        return self::$types;
+    }
 
     public function setWired(bool $wired): void
     {
@@ -93,11 +102,11 @@ abstract class ElectronicItem
 
     public function maxExtras(int $max): void
     {
-        $this->extras_limit = $max;
+        $this->extrasMax = $max;
     }
 
     public function getExtrasMaximum(): int
     {
-        return $this->extras_limit;
+        return $this->extrasMax;
     }
 }

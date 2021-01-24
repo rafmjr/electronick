@@ -5,14 +5,12 @@ namespace App\Models;
 class ElectronicItems
 {
     /**
-     * [$items description]
      * @var array
      */
     private $items = array();
 
     /**
-     * [__construct description]
-     * @param array $items [description]
+     * @param array $items
      */
     public function __construct(array $items)
     {
@@ -22,29 +20,70 @@ class ElectronicItems
     /**
      * Returns the items depending on the sorting type requested
      *
+     * @param string $type
      * @return array
      */
-    public function getSortedItems($type)
+    public function getSortedItems(): array
     {
         $sorted = array();
-        return ksort($sorted, SORT_NUMERIC);
+        foreach ($this->items as $item) {
+            $sorted[($item->getPrice() * 100)] = $item;
+        }
+        ksort($sorted, SORT_NUMERIC);
+
+        return array_values($sorted);
     }
 
     /**
-     * [getItemsByType description]
-     * @param  [type] $type [description]
-     * @return [type]       [description]
+     * Returns the items depending on the type requested
+     *
+     * @param string $type
+     * @return mixed
      */
-    public function getItemsByType($type)
+    public function getItemsByType(string $type)
     {
-        // FIXME: $types access is private
-        if (in_array($type, ElectronicItem::$types)) {
-            $callback = function ($item) use ($type) {
-                return $item->type == $type;
-            };
+        if (!in_array($type, ElectronicItem::getTypes())) {
+            return false;
         }
 
-        $items = array_filter($this->items, $callback);
+        $callback = function ($item) use ($type) {
+            return $item->getType() == $type;
+        };
+
+        return array_filter($this->items, $callback);
+    }
+
+    /**
+     * Outputs the total price for items
+     *
+     * @return void
+     */
+    public function outputPrice(): void
+    {
+        echo array_reduce($this->items, function($carry, ElectronicItem $item) {
+            return $carry + $item->getPrice();
+        }, 0);
+    }
+
+    /**
+     * Returns the price for a given ElectronicItem type
+     *
+     * @param string $type
+     * @return bool|float total price for items of the specified type or false when missing
+     */
+    public function getPriceByType(string $type)
+    {
+        $items = $this->getItemsByType($type);
+
+        if (is_array($items)) {
+            $total = 0.00;
+            foreach ($items as $item) {
+                $total += $item->getPrice();
+            }
+
+            return $total;
+        }
+
         return false;
     }
 }
