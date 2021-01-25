@@ -2,8 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\ElectronicItem;
+use App\Traits\ValidatesItems;
+
 class ElectronicItems
 {
+    use ValidatesItems;
+
     /**
      * @var array
      */
@@ -11,34 +16,44 @@ class ElectronicItems
 
     /**
      * @param array $items
+     * @throws \App\Exceptions\UnexpectedItemType
      */
     public function __construct(array $items)
     {
+        $this->validate($items, ElectronicItem::class);
         $this->items = $items;
     }
 
     /**
      * Returns the items depending on the sorting type requested
      *
-     * @param string $type
      * @return array
      */
     public function getSortedItems(): array
     {
-        $sorted = array();
-        foreach ($this->items as $item) {
-            $sorted[($item->getPrice() * 100)] = $item;
-        }
-        ksort($sorted, SORT_NUMERIC);
+        // avoid any undesidered mutations
+        $sorted = array_values($this->items);
 
-        return array_values($sorted);
+        // callback to compare items while avoiding merge items with the same price
+        $callback = function (ElectronicItem $itemA, ElectronicItem $itemB) {
+            if ($itemA->getPrice() > $itemB->getPrice()) {
+                return 1;
+            } else if ($itemA->getPrice() < $itemB->getPrice()) {
+                return -1;
+            }
+            return 0;
+        };
+
+        // sort the items and return the value
+        usort($sorted, $callback);
+        return $sorted;
     }
 
     /**
      * Returns the items depending on the type requested
      *
      * @param string $type
-     * @return mixed
+     * @return bool|array
      */
     public function getItemsByType(string $type)
     {
@@ -60,9 +75,11 @@ class ElectronicItems
      */
     public function outputPrice(): void
     {
-        echo array_reduce($this->items, function($carry, ElectronicItem $item) {
+        $totalPrice = array_reduce($this->items, function($carry, ElectronicItem $item) {
             return $carry + $item->getPrice();
         }, 0);
+
+        echo $totalPrice;
     }
 
     /**

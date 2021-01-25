@@ -2,37 +2,39 @@
 
 namespace App\Models;
 
+use App\Exceptions\ExtrasMaximumSizeReached;
+use App\Traits\ValidatesItems;
+
 abstract class ElectronicItem
 {
+    use ValidatesItems;
+
     const ELECTRONIC_ITEM_CONSOLE = 'console';
     const ELECTRONIC_ITEM_MICROWAVE = 'microwave';
     const ELECTRONIC_ITEM_TELEVISION = 'television';
     const ELECTRONIC_ITEM_CONTROLLER = 'controller';
 
     /**
-     * [$types description]
      * @var array
      */
     private static $types = array(
         self::ELECTRONIC_ITEM_CONSOLE,
         self::ELECTRONIC_ITEM_MICROWAVE,
         self::ELECTRONIC_ITEM_TELEVISION,
+        self::ELECTRONIC_ITEM_CONTROLLER,
     );
 
     /**
-     * [$price description]
      * @var float
      */
     protected $price;
 
     /**
-     * [$wired description]
      * @var bool
      */
     protected $wired;
 
     /**
-     * [$type description]
      * @var string
      */
     protected $type;
@@ -43,8 +45,7 @@ abstract class ElectronicItem
     protected $extras = array();
 
     /**
-     * [$extrasMax description]
-     * @var [type]
+     * @var int
      */
     protected $extrasMax = -1;
 
@@ -89,9 +90,19 @@ abstract class ElectronicItem
         return $this->type;
     }
 
+    /**
+     * @param array $extras
+     * @throws \App\Exceptions\ExtrasMaximumSizeReached
+     * @throws \App\Exceptions\UnexpectedItemType
+     */
     public function setExtras(array $extras): void
     {
-        // TODO: validate array's content and size and throw domain exception
+        if ($this->extrasMax > 0 && count($extras) > $this->extrasMax) {
+            throw new ExtrasMaximumSizeReached($this->extrasMax, $extras);
+        }
+
+        $this->validate($extras, self::class);
+
         $this->extras = $extras;
     }
 
@@ -100,8 +111,16 @@ abstract class ElectronicItem
         return $this->extras;
     }
 
+    /**
+     * @param int $max
+     * @throws \App\Exceptions\ExtrasMaximumSizeReached
+     */
     public function maxExtras(int $max): void
     {
+        if (count($this->extras) > $max) {
+            throw new ExtrasMaximumSizeReached($max, $this->extras);
+        }
+
         $this->extrasMax = $max;
     }
 

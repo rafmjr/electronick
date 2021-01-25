@@ -4,6 +4,10 @@ namespace App\Models;
 
 class Controller extends ElectronicItem
 {
+    /**
+     * Controller constructor.
+     * @param bool $wired
+     */
     function __construct(bool $wired = false)
     {
         parent::__construct(0.00, $wired);

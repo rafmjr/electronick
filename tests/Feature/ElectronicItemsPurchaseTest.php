@@ -40,7 +40,7 @@ class ElectronicItemsPurchaseTest extends TestCase
         $this->assertEquals(array($microwave, $tv, $tvTwo, $console), $sorted);
 
         // expect it outputs the total price
-        $total = array_sum(array_map(function ($item) { return $item->getPrice(); }, $items));
+        $total = array_sum(array_map(function (ElectronicItem $item) { return $item->getPrice(); }, $items));
         $this->expectOutputString($total);
         $electronicItems->outputPrice();
 
